@@ -8,7 +8,7 @@
 #
 #      R. I. Bot, E. Chenchene, J. M. Fadili.
 #      Generalized Fast Krasnoselskii-Mann Method with Preconditioners,
-#      2024. DOI: XX.YYYYY/arXiv.XXXX.YYYYY.
+#      2024. DOI: 10.48550/arXiv.2411.18574.
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,14 +23,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-This file contains an implementation of the graph DRS method to find the
-geometric median of N points in Rd
+This file contains useful functions reproduce our numerical experiments in
+Section 5 of:
 
 R. I. Bot, E. Chenchene, J. M. Fadili.
 Generalized Fast Krasnoselskii-Mann Method with Preconditioners,
-2024. DOI: XX.YYYYY/arXiv.XXXX.YYYYY.
+2024. DOI: 10.48550/arXiv.2411.18574.
 
 """
+
 import numpy as np
 
 
@@ -91,9 +92,9 @@ def create_operator(op_type):
     if op_type == 'primal_dual':
 
         d = 2
-        prox_1 = lambda w : soft(w, 0.001)
+        prox_1 = lambda w: soft(w, 0.001)
         center2 = np.ones(2)
-        prox_2 = lambda w : (w + proj_ball(w, center2)) / 2
+        prox_2 = lambda w: (w + proj_ball(w, center2)) / 2
         J = Operator(prox_1, prox_2)
         init = np.zeros(2)
 
@@ -105,7 +106,7 @@ def create_operator(op_type):
         M[:int(d / 2), int(d / 2):] = np.eye(int(d / 2))
         resolvent = np.linalg.inv(np.eye(d) + 1e-2 * M)
         prox_2 = lambda w: resolvent @ w
-        prox_1 = lambda w : w
+        prox_1 = lambda w: w
         J = Operator(prox_1, prox_2)
         init = 10 * np.ones(d)
 

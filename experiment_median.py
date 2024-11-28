@@ -8,7 +8,7 @@
 #
 #      R. I. Bot, E. Chenchene, J. M. Fadili.
 #      Generalized Fast Krasnoselskii-Mann Method with Preconditioners,
-#      2024. DOI: XX.YYYYY/arXiv.XXXX.YYYYY.
+#      2024. DOI: 10.48550/arXiv.2411.18574.
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,22 +23,24 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-This file contains an implementation of the graph DRS method to find the
-geometric median of N points in Rd
+This file contains an implementation of the fast Graph-DRS method to solve the
+geometric median problem in Section 5 of:
 
 R. I. Bot, E. Chenchene, J. M. Fadili.
 Generalized Fast Krasnoselskii-Mann Method with Preconditioners,
-2024. DOI: XX.YYYYY/arXiv.XXXX.YYYYY.
+2024. DOI: 10.48550/arXiv.2411.18574.
 
 """
 
 import numpy as np
-import structures as st
 import matplotlib.pyplot as plt
 import optimize as opt
 
 
 def proj_ball(radius, w):
+    '''
+    Computes the euclidean projection onto the ball of radius 'radius'
+    '''
 
     norm = np.linalg.norm(w)
 
@@ -50,7 +52,7 @@ def proj_ball(radius, w):
 
 def soft(tau, w):
     '''
-    proximity operator of | w |
+    Computes the proximity operator of f(w) = |w| with step-size tau
     '''
 
     return w - proj_ball(tau, w)
@@ -58,7 +60,7 @@ def soft(tau, w):
 
 def prox_abs_tilted(tau, w, x):
     '''
-    proximity operator of | w - x |
+    Computes the proximity operator of f(w) = |w - x| with step-size tau
     '''
 
     return x + soft(tau, w - x)
@@ -76,13 +78,12 @@ def optimize_median(maxit, init, J, sig, eta):
     # comparison
     alpha = 16
 
-    plt.loglog([1 / (k + 1) for k in range(maxit)],
-                     '--', color='k', alpha=0.3)
-    plt.loglog([1 / (k + 1) ** 2 for k in range(maxit)],
-                     '--', color='k', alpha=0.3)
+    plt.loglog([1 / (k + 1) for k in range(maxit)], '--', color='k', alpha=0.3)
+    plt.loglog([1 / (k + 1) ** 2 for k in range(maxit)], '--', color='k',
+               alpha=0.3)
 
     # km
-    Rs = opt.km(J, init, lambda k : 1, maxit)
+    Rs = opt.km(J, init, lambda k: 1, maxit)
     Storage[0, :] = Rs
 
     # fast km no cooling

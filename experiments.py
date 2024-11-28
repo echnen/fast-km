@@ -8,7 +8,7 @@
 #
 #      R. I. Bot, E. Chenchene, J. M. Fadili.
 #      Generalized Fast Krasnoselskii-Mann Method with Preconditioners,
-#      2024. DOI: XX.YYYYY/arXiv.XXXX.YYYYY.
+#      2024. DOI: 10.48550/arXiv.2411.18574.
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,12 +23,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-This file contains an implementation of the graph DRS method to find the
-geometric median of N points in Rd
+This file contains our numerical experiments in Section 5 of:
 
 R. I. Bot, E. Chenchene, J. M. Fadili.
 Generalized Fast Krasnoselskii-Mann Method with Preconditioners,
-2024. DOI: XX.YYYYY/arXiv.XXXX.YYYYY.
+2024. DOI: 10.48550/arXiv.2411.18574.
 
 """
 
@@ -39,10 +38,9 @@ import experiment_ot as ot
 import experiment_median as md
 
 
-
 def experiment_1(maxit, sig, init, J, num_experiment=1):
     '''
-    Testing various choices of eta
+    Implements the experiment in Section 5.2.1.
     '''
 
     # testing the following mus
@@ -53,7 +51,7 @@ def experiment_1(maxit, sig, init, J, num_experiment=1):
                         [16, 32]])
 
     # storage
-    Storage = {(0, 0):[], (0, 1):[], (1, 0):[], (1, 1):[]}
+    Storage = {(0, 0): [], (0, 1): [], (1, 0): [], (1, 1): []}
 
     for i in range(2):
         for j in range(2):
@@ -80,7 +78,7 @@ def experiment_1(maxit, sig, init, J, num_experiment=1):
 
 def experiment_2(maxit, eta, init, J, num_experiment):
     '''
-    Testing sigmas
+    Implements the experiment in Section 5.2.2.
     '''
 
     # testing the following mus
@@ -91,7 +89,7 @@ def experiment_2(maxit, eta, init, J, num_experiment):
                         [16, 32]])
 
     # storage
-    Storage = {(0, 0):[], (0, 1):[], (1, 0):[], (1, 1):[]}
+    Storage = {(0, 0): [], (0, 1): [], (1, 0): [], (1, 1): []}
 
     for i in range(2):
         for j in range(2):
@@ -117,9 +115,12 @@ def experiment_2(maxit, eta, init, J, num_experiment):
 
 
 def experiment_3(maxit, init, J, num_experiment):
+    '''
+    Implements the experiment in Section 5.3.
+    '''
 
     # choosing parameters
-    eta = 1/2
+    eta = 1 / 2
     sig = 2
 
     # testing the following alphas
@@ -127,7 +128,7 @@ def experiment_3(maxit, init, J, num_experiment):
                         [16, 32]])
 
     # storage
-    Storage = {(0, 0):[], (0, 1):[], (1, 0):[], (1, 1):[]}
+    Storage = {(0, 0): [], (0, 1): [], (1, 0): [], (1, 1): []}
 
     # comparison
     for i in range(2):
@@ -137,22 +138,22 @@ def experiment_3(maxit, init, J, num_experiment):
             alpha = Choices[i, j]
 
             # km
-            Rs = opt.km(J, init, lambda k : 1, maxit)
+            Rs = opt.km(J, init, lambda k: 1, maxit)
             Storage[(i, j)] = Rs
 
             # fast km no cooling
-            Rs = opt.fkm_plus(J, alpha, eta, sig, init, maxit, Cooling=(False, None),
-                              Verbose=False)
+            Rs = opt.fkm_plus(J, alpha, eta, sig, init, maxit,
+                              Cooling=(False, None), Verbose=False)
             Storage[(i, j)] = np.vstack((Storage[(i, j)], Rs))
 
             # fast km with cooling
-            Rs = opt.fkm_plus(J, 2, eta, sig, init, maxit, Cooling=(True, 'linear'),
-                              Verbose=False)
+            Rs = opt.fkm_plus(J, 2, eta, sig, init, maxit,
+                              Cooling=(True, 'linear'), Verbose=False)
             Storage[(i, j)] = np.vstack((Storage[(i, j)], Rs))
 
             # fast km with cooling
-            Rs = opt.fkm_plus(J, 2, eta, sig, init, maxit, Cooling=(True, 'log'),
-                              Verbose=False)
+            Rs = opt.fkm_plus(J, 2, eta, sig, init, maxit,
+                              Cooling=(True, 'log'), Verbose=False)
             Storage[(i, j)] = np.vstack((Storage[(i, j)], Rs))
 
             # axs[i, j].grid(which='both')
@@ -162,6 +163,9 @@ def experiment_3(maxit, init, J, num_experiment):
 
 
 def experiment_ot(maxit):
+    '''
+    Implements the experiment in Section 5.4.1.
+    '''
 
     p = 100
 
@@ -185,6 +189,9 @@ def experiment_ot(maxit):
 
 
 def experiment_median(maxit):
+    '''
+    Implements the experiment in Section 5.4.2.
+    '''
 
     # generating sample
     dim = 2
@@ -200,7 +207,7 @@ def experiment_median(maxit):
     Z = Z - mean[np.newaxis, :]
     Lap = Z @ Z.T
 
-    prox_list = [lambda tau, w : md.prox_abs_tilted(tau, w, s) for s in S.T]
+    prox_list = [lambda tau, w: md.prox_abs_tilted(tau, w, s) for s in S.T]
     J = st.Operator_N(tau, prox_list, dim, Lap)
 
     # choosing parameters

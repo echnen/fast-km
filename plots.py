@@ -8,7 +8,7 @@
 #
 #      R. I. Bot, E. Chenchene, J. M. Fadili.
 #      Generalized Fast Krasnoselskii-Mann Method with Preconditioners,
-#      2024. DOI: XX.YYYYY/arXiv.XXXX.YYYYY.
+#      2024. DOI: 10.48550/arXiv.2411.18574.
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,12 +23,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-This file contains an implementation of the graph DRS method to find the
-geometric median of N points in Rd
+This file contains useful functions to plot our numerical experiments in
+Section 5 of:
 
 R. I. Bot, E. Chenchene, J. M. Fadili.
 Generalized Fast Krasnoselskii-Mann Method with Preconditioners,
-2024. DOI: XX.YYYYY/arXiv.XXXX.YYYYY.
+2024. DOI: 10.48550/arXiv.2411.18574.
 
 """
 
@@ -60,7 +60,9 @@ def plot_experiment_1(Storage, maxit, sig, num_experiment=1):
 
     fig, axs = plt.subplots(2, 2, figsize=(15, 15), sharex=True, sharey=True)
 
-    cmap = LinearSegmentedColormap.from_list("WhiteBlue", [(0, 0, 0), (0, 0, 1), (0.5, 0.9, 1)])
+    cmap = LinearSegmentedColormap.from_list("WhiteBlue", [(0, 0, 0),
+                                                           (0, 0, 1),
+                                                           (0.5, 0.9, 1)])
     norm = Normalize(0.01, 0.99)
     sm = ScalarMappable(cmap=cmap, norm=norm)
     sm.set_array([])
@@ -100,22 +102,17 @@ def plot_experiment_1(Storage, maxit, sig, num_experiment=1):
             if j == 0:
                 axs[i, j].set_ylabel('Residual')
 
-
     cbar_ax = fig.add_axes([0.25, 0.03, 0.5, 0.01])
-    cbar = plt.colorbar(sm, ticks=np.round(Etas[0:-1:3], 2), anchor=(2, 0), cax=cbar_ax,
-                        orientation="horizontal")
-    plt.savefig('results/experiment_1_' + f'{num_experiment}.pdf', bbox_inches='tight')
+    cbar = plt.colorbar(sm, ticks=np.round(Etas[0: -1: 3], 2), anchor=(2, 0),
+                        cax=cbar_ax, orientation="horizontal")
+    plt.savefig('results/experiment_1_' + f'{num_experiment}.pdf',
+                bbox_inches='tight')
     # cbar.ax.set_title(r'$ \eta $', fontsize=fonts)
     # cbar.set_label(r'$ \eta $')
     plt.show()
 
-    return
-
 
 def plot_experiment_2(Storage, maxit, eta, num_experiment):
-    '''
-    Testing sigmas
-    '''
 
     # testing the following mus
     Sigs = np.linspace(1, 100, 20)
@@ -126,7 +123,9 @@ def plot_experiment_2(Storage, maxit, eta, num_experiment):
 
     fig, axs = plt.subplots(2, 2, figsize=(15, 15), sharex=True, sharey=True)
 
-    cmap = LinearSegmentedColormap.from_list("WhiteBlue", [(0, 0, 0), (0, 0, 1), (0.5, 0.9, 1)])
+    cmap = LinearSegmentedColormap.from_list("WhiteBlue", [(0, 0, 0),
+                                                           (0, 0, 1),
+                                                           (0.5, 0.9, 1)])
     norm = Normalize(1, 100)
     sm = ScalarMappable(cmap=cmap, norm=norm)
     sm.set_array([])  # Empty array for ScalarMappable
@@ -138,7 +137,6 @@ def plot_experiment_2(Storage, maxit, eta, num_experiment):
             num_plot = 0
 
             alpha = Choices[i, j]
-            alpha_eta = eta + (1 - eta) * (alpha - 1)
 
             axs[i, j].loglog([1 / (k + 1) for k in range(maxit)],
                              '--', color='k', alpha=0.3)
@@ -171,85 +169,16 @@ def plot_experiment_2(Storage, maxit, eta, num_experiment):
             if j == 0:
                 axs[i, j].set_ylabel('Residual')
 
-
     cbar_ax = fig.add_axes([0.25, 0.03, 0.5, 0.01])
-    cbar = plt.colorbar(sm, ticks=np.round(Sigs[0:-1:3], 2), anchor=(2.0,0.0), cax=cbar_ax,
-                        orientation="horizontal")
-    plt.savefig('results/experiment_2_' + f'{num_experiment}.pdf', bbox_inches='tight')
+    cbar = plt.colorbar(sm, ticks=np.round(Sigs[0:-1:3], 2), anchor=(2.0, 0.0),
+                        cax=cbar_ax, orientation="horizontal")
+    plt.savefig('results/experiment_2_' + f'{num_experiment}.pdf',
+                bbox_inches='tight')
     cbar.ax.set_title(r'$ \sigma $', fontsize=fonts)
     plt.show()
 
-    return
-
 
 def plot_experiment_3(Storage, maxit, num_experiment):
-
-    # choosing parameters
-    eta = 0.5
-    sig = 2
-
-    # testing the following alphas
-    Choices = np.array([[2, 4],
-                        [16, 32]])
-
-    # initialize plot
-    fig, axs = plt.subplots(2, 2, figsize=(15, 15), sharex=True, sharey=True)
-
-    # comparison
-    for i in range(2):
-        for j in range(2):
-
-            print(f'Case: {(i, j)}')
-            alpha = Choices[i, j]
-
-            axs[i, j].loglog([1 / (k + 1) for k in range(maxit)],
-                             '--', color='k', alpha=0.3)
-            axs[i, j].loglog([1 / (k + 1) ** 2 for k in range(maxit)],
-                             '--', color='k', alpha=0.3)
-
-            # km
-            Rs = Storage[(i, j)][0, :]
-            axs[i, j].loglog(Rs, color='k', label='KM')
-
-            # fast km no cooling
-            Rs = Storage[(i, j)][1, :]
-            axs[i, j].loglog(Rs, color='b', label='fKM')
-
-            # fast km with cooling
-            Rs = Storage[(i, j)][2, :]
-            axs[i, j].loglog(Rs, color='r', label='fKM-LNC')
-
-            # fast km with cooling
-            Rs = Storage[(i, j)][3, :]
-            axs[i, j].loglog(Rs, color='orange', label='fKM-LGC')
-
-            # axs[i, j].grid(which='both')
-            axs[i, j].set_xlim(1, maxit)
-
-            if (i, j) == (1, 1):
-                axs[i, j].set_title(r'$\alpha_0$ = ' + f'{alpha}, ')
-                axs[i, j].legend(bbox_to_anchor=(0.35, -0.19), ncol=2)
-
-            else:
-                axs[i, j].set_title(r'$\alpha_0$ = ' + f'{int(alpha)}, ')
-
-            if i == 1:
-                axs[i, j].set_xlabel('Number of iteration')
-            if j == 0:
-                axs[i, j].set_ylabel('Residual')
-
-
-    plt.savefig('results/experiment_3_' + f'{num_experiment}.pdf', bbox_inches='tight')
-    plt.show()
-
-    return
-
-
-def plot_experiment_3_v2(Storage, maxit, num_experiment):
-
-    # choosing parameters
-    eta = 0.5
-    sig = 2
 
     # initialize plot
     rc('font', **{'family': 'serif', 'serif': ['Computer Modern'],
@@ -267,10 +196,10 @@ def plot_experiment_3_v2(Storage, maxit, num_experiment):
         print(f'Case: {(i)}')
         alpha = Choices[i]
 
-        axs[i].loglog([1 / (k + 1) for k in range(maxit)],
-                         '--', color='k', alpha=0.3)
-        axs[i].loglog([1 / (k + 1) ** 2 for k in range(maxit)],
-                         '--', color='k', alpha=0.3)
+        axs[i].loglog([1 / (k + 1) for k in range(maxit)], '--',
+                      color='k', alpha=0.3)
+        axs[i].loglog([1 / (k + 1) ** 2 for k in range(maxit)], '--',
+                      color='k', alpha=0.3)
 
         # km
         Rs = Storage[(i % 2, i // 2)][0, :]
@@ -295,7 +224,8 @@ def plot_experiment_3_v2(Storage, maxit, num_experiment):
 
         if i == 0:
             axs[i].set_title(r'$\alpha$ = ' + f'{alpha}')
-            axs[i].legend(bbox_to_anchor=(2.25, -0.2), ncol=4, loc='upper center')
+            axs[i].legend(bbox_to_anchor=(2.25, -0.2), ncol=4,
+                          loc='upper center')
 
         else:
             axs[i].set_title(r'$\alpha$ = ' + f'{int(alpha)}')
@@ -303,11 +233,12 @@ def plot_experiment_3_v2(Storage, maxit, num_experiment):
         if i == 0:
             axs[i].set_ylabel('Residual')
 
-    # fig.legend(loc='lower right', bbox_to_anchor=(1,-0.1), ncol=4, bbox_transform=fig.transFigure)
-    plt.savefig('results/experiment_3_' + f'{num_experiment}.pdf', bbox_inches='tight')
+    plt.savefig('results/experiment_3_' + f'{num_experiment}.pdf',
+                bbox_inches='tight')
     plt.show()
 
     return
+
 
 def plot_ot_and_median_experiment(Storage_ot, Storage_md, maxit_ot, maxit_md):
 
@@ -322,10 +253,10 @@ def plot_ot_and_median_experiment(Storage_ot, Storage_md, maxit_ot, maxit_md):
     for i in range(2):
 
         maxit = maxits[i]
-        axs[i].loglog([1 / (k + 1) for k in range(maxit)],
-                         '--', color='k', alpha=0.3)
-        axs[i].loglog([1 / (k + 1) ** 2 for k in range(maxit)],
-                         '--', color='k', alpha=0.3)
+        axs[i].loglog([1 / (k + 1) for k in range(maxit)], '--',
+                      color='k', alpha=0.3)
+        axs[i].loglog([1 / (k + 1) ** 2 for k in range(maxit)], '--',
+                      color='k', alpha=0.3)
 
         # km
         Rs = Storages[i][0, :]
@@ -333,11 +264,13 @@ def plot_ot_and_median_experiment(Storage_ot, Storage_md, maxit_ot, maxit_md):
 
         # fast km no cooling
         Rs = Storages[i][1, :]
-        axs[i].loglog(Rs, linewidth=3, color='orange', alpha=1, label='fKM, ' + r'$\eta = 0.1$')
+        axs[i].loglog(Rs, linewidth=3, color='orange', alpha=1,
+                      label='fKM, ' + r'$\eta = 0.1$')
 
         # fast km no cooling
         Rs = Storages[i][2, :]
-        axs[i].loglog(Rs, linewidth=3, color='r', alpha=1, label='fKM, ' + r'$\eta = 0.5$')
+        axs[i].loglog(Rs, linewidth=3, color='r', alpha=1,
+                      label='fKM, ' + r'$\eta = 0.5$')
 
         # fast km with cooling
         Rs = Storages[i][3, :]

@@ -8,7 +8,7 @@
 #
 #      R. I. Bot, E. Chenchene, J. M. Fadili.
 #      Generalized Fast Krasnoselskii-Mann Method with Preconditioners,
-#      2024. DOI: XX.YYYYY/arXiv.XXXX.YYYYY.
+#      2024. DOI: 10.48550/arXiv.2411.18574.
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,13 +23,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-This file contains an implementation of the graph DRS method to find the
-geometric median of N points in Rd
+Run this script to reproduce all numerical experiments in Section 5 of:
 
 R. I. Bot, E. Chenchene, J. M. Fadili.
 Generalized Fast Krasnoselskii-Mann Method with Preconditioners,
-2024. DOI: XX.YYYYY/arXiv.XXXX.YYYYY.
+2024. DOI: 10.48550/arXiv.2411.18574.
 
+Note: This takes from 5 to 10 minutes to complete.
 """
 
 import experiments as exp
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     Storage_3 = exp.experiment_3(100000, init_mt, J_mt, num_experiment=1)
     show.plot_experiment_3(Storage_3, 100000, num_experiment=1)
 
-    # experiment ot and median
+    # experiment optimal transport and median
     Storage_ot = exp.experiment_ot(1000)
     Storage_md = exp.experiment_median(5000)
     show.plot_ot_and_median_experiment(Storage_ot, Storage_md, 1000, 5000)

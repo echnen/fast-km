@@ -8,7 +8,7 @@
 #
 #      R. I. Bot, E. Chenchene, J. M. Fadili.
 #      Generalized Fast Krasnoselskii-Mann Method with Preconditioners,
-#      2024. DOI: XX.YYYYY/arXiv.XXXX.YYYYY.
+#      2024. DOI: 10.48550/arXiv.2411.18574.
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,12 +23,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-This file contains an implementation of the graph DRS method to find the
-geometric median of N points in Rd
+This file contains an implementation of the fast Graph-DRS method to solve the
+geometric median problem in Section 5 of:
 
 R. I. Bot, E. Chenchene, J. M. Fadili.
 Generalized Fast Krasnoselskii-Mann Method with Preconditioners,
-2024. DOI: XX.YYYYY/arXiv.XXXX.YYYYY.
+2024. DOI: 10.48550/arXiv.2411.18574.
 
 """
 
@@ -41,6 +41,9 @@ import optimize as opt
 
 
 def create_sparse_gradx_mat(p):
+    '''
+    Creates a sparse matrix that computes the partial derivative w.r.t. x.
+    '''
 
     diag = np.ones(p)
     diag[-1] = 0
@@ -52,6 +55,9 @@ def create_sparse_gradx_mat(p):
 
 
 def create_sparse_grady_mat(p):
+    '''
+    Creates a sparse matrix that computes the partial derivative w.r.t. y.
+    '''
 
     diag = np.ones(p ** 2)
     diag[-p:] = 0 * diag[-p:]
@@ -65,6 +71,9 @@ def create_sparse_grady_mat(p):
 
 
 def grad(psi, Dx, Dy, n):
+    '''
+    Computes the gradient of an image psi.
+    '''
 
     sig_out = np.zeros((n, 2))
 
@@ -75,31 +84,47 @@ def grad(psi, Dx, Dy, n):
 
 
 def div(sig, M1, M2):
+    '''
+    Computes the divergence of a vector field sig.
+    '''
 
     return M1 @ sig[:, 0] + M2 @ sig[:, 1]
 
 
 def proj_inf_2(sig, n):
+    '''
+    Computes the projection onto the ell 2 norm for vector fields.
+    '''
 
     sig_out = np.copy(sig)
     Norm = np.linalg.norm(sig_out, axis=1)
     Greater = Norm > 1
-    sig_out[Greater] = np.divide(sig_out[Greater], np.transpose(np.asmatrix(Norm[Greater])))
+    sig_out[Greater] = np.divide(sig_out[Greater],
+                                 np.transpose(np.asmatrix(Norm[Greater])))
 
     return sig_out
 
 
 def prox_l1(tau, sig, n):
+    '''
+    Computes the proximity operator of the group Lasso penalty.
+    '''
 
     return sig - tau * proj_inf_2(sig / tau, n)
 
 
 def proj_div(tau, sig, mu, nu, M1, M2, Dx, Dy, Lap, n):
+    '''
+    Computes the projection onto zero divergence contraints.
+    '''
 
     return sig - grad(spl.spsolve(Lap, div(sig, M1, M2) + mu - nu), Dx, Dy, n)
 
 
 def read_image(img1, p):
+    '''
+    Reads an image.
+    '''
 
     img_brg = Image.open(img1).convert('L')
     Img = 255 - np.array(img_brg.resize((p, p)))
@@ -109,6 +134,9 @@ def read_image(img1, p):
 
 
 def read_measures(img1, img2, p):
+    '''
+    Turns images into probability measures.
+    '''
 
     mu = read_image(img1, p)
     mu = mu / np.sum(mu)
@@ -129,8 +157,8 @@ def optimization_ot(tau, p, n, mu, nu, M1, M2, Dx, Dy, Lap, maxit):
     Storage = np.zeros((4, maxit))
 
     # define DRS operator
-    prox_1 = lambda w : proj_div(tau, w, mu, nu, M1, M2, Dx, Dy, Lap, n)
-    prox_2 = lambda w : prox_l1(tau, w, n)
+    prox_1 = lambda w: proj_div(tau, w, mu, nu, M1, M2, Dx, Dy, Lap, n)
+    prox_2 = lambda w: prox_l1(tau, w, n)
     J = st.Operator(prox_1, prox_2)
 
     # initialization
@@ -139,7 +167,7 @@ def optimization_ot(tau, p, n, mu, nu, M1, M2, Dx, Dy, Lap, maxit):
     alpha = 16
 
     # km
-    Rs = opt.km(J, w, lambda k : 1, maxit)
+    Rs = opt.km(J, w, lambda k: 1, maxit)
     Storage[0, :] = Rs
 
     # fast km no cooling
